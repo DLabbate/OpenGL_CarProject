@@ -45,6 +45,12 @@
     <ClInclude Include="Spawner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ColliderBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Collider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -75,6 +81,12 @@
       <Filter>Code\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Spawner.cpp">
+      <Filter>Code\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ColliderBox.cpp">
+      <Filter>Code\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Collider.cpp">
       <Filter>Code\Source Files</Filter>
     </ClCompile>
   </ItemGroup>

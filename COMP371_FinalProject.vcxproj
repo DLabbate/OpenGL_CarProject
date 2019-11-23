@@ -158,6 +158,8 @@
     <ClInclude Include="Axes.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CarModel.h" />
+    <ClInclude Include="Collider.h" />
+    <ClInclude Include="ColliderBox.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="pch.h" />
@@ -169,6 +171,8 @@
     <ClCompile Include="Axes.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CarModel.cpp" />
+    <ClCompile Include="Collider.cpp" />
+    <ClCompile Include="ColliderBox.cpp" />
     <ClCompile Include="COMP371_FinalProject.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="Light.cpp" />

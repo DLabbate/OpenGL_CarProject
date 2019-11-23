@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "ColliderBox.h"
 
 CarModel::CarModel()
 {
@@ -22,6 +23,12 @@ CarModel::CarModel(float x, float y, float z)
 	this->z_pos = z;
 	generateBodyVAO();
 	generateWheelVAO();
+
+	for (unsigned int i = 0; i < 7; i++)
+	{
+		ColliderBox cb;
+		collision_boxes.push_back(cb);
+	}
 }
 
 void CarModel::generateBodyVAO()
@@ -320,82 +327,85 @@ void CarModel::ProcessInputs(GLFWwindow* w, float deltatime)
 	right = glm::normalize(glm::vec3(cos(glm::radians(car_angle)), 0.0f, -sin(glm::radians(car_angle))));
 	front = glm::normalize(glm::vec3(-sin(glm::radians(car_angle)), 0.0f, -cos(glm::radians(car_angle))));
 	wheel_angle += wheel_speed * deltatime;
-
-	if (glfwGetKey(w, GLFW_KEY_W) == GLFW_PRESS)
+	if (movement != hit)
 	{
-		//z_pos -= movementspeed * deltatime;
-		x_pos += front.x * movementspeed * deltatime;
-		y_pos += front.y * movementspeed * deltatime;
-		z_pos += front.z * movementspeed * deltatime;
-		car_angle += wheel_angle_lateral *5.0f* deltatime;
-	}
+		if (glfwGetKey(w, GLFW_KEY_W) == GLFW_PRESS)
+		{
+			//z_pos -= movementspeed * deltatime;
+			x_pos += front.x * movementspeed * deltatime;
+			y_pos += front.y * movementspeed * deltatime;
+			z_pos += front.z * movementspeed * deltatime;
+			car_angle += wheel_angle_lateral * 5.0f* deltatime;
+		}
 
-	if (glfwGetKey(w, GLFW_KEY_S) == GLFW_PRESS)
-	{
-		//z_pos += movementspeed * deltatime;
-		x_pos -= front.x * movementspeed * deltatime;
-		y_pos -= front.y * movementspeed * deltatime;
-		z_pos -= front.z * movementspeed * deltatime;
-		car_angle -= wheel_angle_lateral * 5.0f* deltatime;
-	}
+		if (glfwGetKey(w, GLFW_KEY_S) == GLFW_PRESS)
+		{
+			//z_pos += movementspeed * deltatime;
+			x_pos -= front.x * movementspeed * deltatime;
+			y_pos -= front.y * movementspeed * deltatime;
+			z_pos -= front.z * movementspeed * deltatime;
+			car_angle -= wheel_angle_lateral * 5.0f* deltatime;
+		}
 
-	if (glfwGetKey(w, GLFW_KEY_A) == GLFW_PRESS)
-	{
-		//x_pos -= movementspeed * deltatime;
-		x_pos -= right.x * movementspeed * deltatime;
-		y_pos -= right.y * movementspeed * deltatime;
-		z_pos -= right.z * movementspeed * deltatime;
-	}
+		if (glfwGetKey(w, GLFW_KEY_A) == GLFW_PRESS)
+		{
+			//x_pos -= movementspeed * deltatime;
+			x_pos -= right.x * movementspeed * deltatime;
+			y_pos -= right.y * movementspeed * deltatime;
+			z_pos -= right.z * movementspeed * deltatime;
+		}
 
-	if (glfwGetKey(w, GLFW_KEY_D) == GLFW_PRESS)
-	{
-		//x_pos += movementspeed * deltatime;
-		x_pos += right.x * movementspeed * deltatime;
-		y_pos += right.y * movementspeed * deltatime;
-		z_pos += right.z * movementspeed * deltatime;
-	}
+		if (glfwGetKey(w, GLFW_KEY_D) == GLFW_PRESS)
+		{
+			//x_pos += movementspeed * deltatime;
+			x_pos += right.x * movementspeed * deltatime;
+			y_pos += right.y * movementspeed * deltatime;
+			z_pos += right.z * movementspeed * deltatime;
+		}
 
-	if (glfwGetKey(w, GLFW_KEY_Q) == GLFW_PRESS)
-	{
-		car_angle += 50 * deltatime;
-		right = glm::vec3(cos(glm::radians(car_angle)), 0.0f, -sin(glm::radians(car_angle)));
-	}
+		if (glfwGetKey(w, GLFW_KEY_Q) == GLFW_PRESS)
+		{
+			car_angle += 50 * deltatime;
+			right = glm::vec3(cos(glm::radians(car_angle)), 0.0f, -sin(glm::radians(car_angle)));
+		}
 
-	if (glfwGetKey(w, GLFW_KEY_E) == GLFW_PRESS)
-	{
-		car_angle -= 50 * deltatime;
-		right = glm::vec3(cos(glm::radians(car_angle)), 0.0f, -sin(glm::radians(car_angle)));
-	}
+		if (glfwGetKey(w, GLFW_KEY_E) == GLFW_PRESS)
+		{
+			car_angle -= 50 * deltatime;
+			right = glm::vec3(cos(glm::radians(car_angle)), 0.0f, -sin(glm::radians(car_angle)));
+		}
 
-	if (glfwGetKey(w, GLFW_KEY_U) == GLFW_PRESS)
-	{
-		scale += 1.5 * deltatime;
-	}
+		if (glfwGetKey(w, GLFW_KEY_U) == GLFW_PRESS)
+		{
+			scale += 1.5 * deltatime;
+		}
 
-	if (glfwGetKey(w, GLFW_KEY_J) == GLFW_PRESS && scale >= 0.25)
-	{
-		scale -= 1.5 * deltatime;
-	}
+		if (glfwGetKey(w, GLFW_KEY_J) == GLFW_PRESS && scale >= 0.25)
+		{
+			scale -= 1.5 * deltatime;
+		}
 
-	if (glfwGetKey(w, GLFW_KEY_9) == GLFW_PRESS && scale >= 0.25)
-	{
-		wheel_speed += deltatime * 200;
-	}
+		if (glfwGetKey(w, GLFW_KEY_9) == GLFW_PRESS && scale >= 0.25)
+		{
+			wheel_speed += deltatime * 200;
+		}
 
-	if (glfwGetKey(w, GLFW_KEY_0) == GLFW_PRESS && scale >= 0.25)
-	{
-		wheel_speed -= deltatime * 200;
-	}
+		if (glfwGetKey(w, GLFW_KEY_0) == GLFW_PRESS && scale >= 0.25)
+		{
+			wheel_speed -= deltatime * 200;
+		}
 
-	if (glfwGetKey(w, GLFW_KEY_7) && wheel_angle_lateral <= 30.0f)
-	{
-		wheel_angle_lateral += deltatime * 50.0f;
-	}
+		if (glfwGetKey(w, GLFW_KEY_7) && wheel_angle_lateral <= 30.0f)
+		{
+			wheel_angle_lateral += deltatime * 50.0f;
+		}
 
-	if (glfwGetKey(w, GLFW_KEY_8) && wheel_angle_lateral >= -30.0f)
-	{
-		wheel_angle_lateral -= deltatime * 50.0f;
+		if (glfwGetKey(w, GLFW_KEY_8) && wheel_angle_lateral >= -30.0f)
+		{
+			wheel_angle_lateral -= deltatime * 50.0f;
+		}
 	}
+	
 
 	if (keystate_space == GLFW_RELEASE && glfwGetKey(w, GLFW_KEY_SPACE) == GLFW_PRESS)
 	{
@@ -537,13 +547,13 @@ glm::vec3 CarModel::getExhaust()
 
 void CarModel::TranslateRandom(float dt)
 {
-	if (movement == translate)
+	if ((movement == translate) && move_random)
 	{
 		translation_timer -= dt;
 		if (translation_timer > 0.0f)
 		{
-			float translation_x = front.x * translation_random * dt;
-			float translation_z = front.z * translation_random * dt;
+			float translation_x = front.x * movementspeed * dt;
+			float translation_z = front.z * movementspeed * dt;
 			x_pos = ((x_pos + translation_x) < 40.0f && (x_pos + translation_x) > -40.0f) ? x_pos + translation_x : x_pos;
 			z_pos = ((z_pos + translation_z) < 40.0f && (z_pos + translation_z) > -40.0f) ? z_pos + translation_z : z_pos;
 			/*x_pos = (-40.0f < x_pos < 40.0f) ? x_pos + front.x * translation_random * dt : x_pos;
@@ -552,27 +562,165 @@ void CarModel::TranslateRandom(float dt)
 
 		else
 		{
-			translation_timer = 1.0f; //Reset timer
-			translation_random = static_cast<float>(rand() % 21+5);
+			translation_timer = (static_cast<float> (rand()) / static_cast<float>(RAND_MAX)) *2.0f+1; //Reset timer
+			//translation_random = static_cast<float>(rand() % 21+5);
 			movement = rotate;
 		}
 	}
 
-	else if(movement == rotate)
+	else if((movement == rotate) && move_random)
 	{
 		rotation_timer -= dt;
 		if (rotation_timer > 0.0f)
 		{
-			car_angle += 5.0f * rotation_random * dt;
+			if (rotation_random == 0)
+			{
+				car_angle += 65.0f * dt;
+			}
+
+			else
+			{
+				car_angle -= 65.0f * dt;
+			}
 		}
 
 		else
 		{
-			rotation_timer = 1.0f; //Reset timer
-			rotation_random = static_cast<float>(rand() % 61 - 30);
+			rotation_timer = (static_cast<float> (rand()) / static_cast<float>(RAND_MAX)) *2.0f + 1; //Reset timer
+			rotation_random = (rand() % 2); //left or right
 			movement = translate;
 		}
 
 	}
+
+	else if (movement == hit)
+	{
+		collision_timer -= dt;
+		if (collision_timer > 0.0f)
+		{
+			float translation_x = collision_velocity.x * 10* dt;
+			float translation_y = collision_velocity.y * 10 * dt;
+			float translation_z = collision_velocity.z * 10 * dt;
+			
+			x_pos = ((x_pos + translation_x) < 40.0f && (x_pos + translation_x) > -40.0f) ? x_pos + translation_x : x_pos;
+			y_pos = ((y_pos + translation_y) < 40.0f && (y_pos + translation_y) > -40.0f) ? y_pos + translation_y : y_pos;
+			z_pos = ((z_pos + translation_z) < 40.0f && (z_pos + translation_z) > -40.0f) ? z_pos + translation_z : z_pos;
+		}
+		else
+		{
+			if (move_random)
+			{
+				movement = translate;
+			}
+
+			else
+			{
+				movement = manual;
+			}
+			collision_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+			collision_timer = 0.0f;
+		}
+	}
 	
+}
+
+void CarModel::UpdateTransformations()
+{
+	glm::mat4 rotation_matrix = glm::mat4(1.0); //Rotation applied to all parts of the car
+
+	rotation_matrix = glm::translate(rotation_matrix, glm::vec3(x_pos + 2.0f, 0.0f, z_pos + 2.0f));
+	rotation_matrix = glm::rotate(rotation_matrix, glm::radians(car_angle), glm::vec3(0.0f, 1.0f, 0.0f));
+	rotation_matrix = glm::scale(rotation_matrix, glm::vec3(scale, scale, scale));
+	rotation_matrix = glm::translate(rotation_matrix, glm::vec3(x_pos + 2.0f, 0.0f, z_pos + 2.0f)*-1.0f);
+
+	//Matrix to make wheels spin
+	glm::mat4 wheel_rotation = glm::mat4(1.0);
+	wheel_rotation = glm::rotate(wheel_rotation, -glm::radians(wheel_angle), glm::vec3(1.0f, 0.0f, 0.0f));
+
+
+	glm::mat4 wheel_rotation_lateral = glm::mat4(1.0);
+	wheel_rotation_lateral = glm::rotate(wheel_rotation_lateral, glm::radians(wheel_angle_lateral), glm::vec3(0.0f, 1.0f, 0.0f));
+
+	//***TOP LEFT WHEEL***
+	//Notes: For the wheels, rotation (along wheels origin) is applied first, following a translate, and subsequently a rotation of the car
+	//Rotation of the car is applied Last
+	glm::mat4 wheel1_transform = glm::mat4(1.0f);
+	wheel1_transform = rotation_matrix * glm::translate(wheel1_transform, glm::vec3(x_pos + 0.0f, y_pos + 0.0f, z_pos + 0.0f)) *wheel_rotation_lateral * wheel_rotation;
+	this->wheel1_transform = wheel1_transform;
+
+	//***TOP RIGHT WHEEL***
+	glm::mat4 wheel2_transform = glm::mat4(1.0);
+	wheel2_transform = rotation_matrix * glm::translate(wheel2_transform, glm::vec3(x_pos + 4.0f, y_pos + 0.0f, z_pos + 0.0f)) * wheel_rotation_lateral * wheel_rotation;
+	this->wheel2_transform = wheel2_transform;
+
+	//***BOTTOM LEFT WHEEL***
+	glm::mat4 wheel3_transform = glm::mat4(1.0);
+	wheel3_transform = rotation_matrix * glm::translate(wheel3_transform, glm::vec3(x_pos + 0.0f, y_pos + 0.0f, z_pos + 4.0f)) * wheel_rotation;
+	this->wheel3_transform = wheel3_transform;
+
+	//***BOTTOM RIGHT WHEEL***
+	glm::mat4 wheel4_transform = glm::mat4(1.0);
+	wheel4_transform = rotation_matrix * glm::translate(wheel4_transform, glm::vec3(x_pos + 4.0f, y_pos + 0.0f, z_pos + 4.0f)) * wheel_rotation;
+	this->wheel4_transform = wheel4_transform;
+
+	//***BODY***
+	glm::mat4 body_transform = glm::mat4(1.0);
+	body_transform = rotation_matrix * glm::translate(body_transform, glm::vec3(x_pos + 2.0f, y_pos + 0.75f, z_pos + 2.0f));
+	body_transform = glm::scale(body_transform, glm::vec3(3.0f, 2.5f, 5.0f));
+	this->body_transform = body_transform;
+
+	//***TRUNK***
+	glm::mat4 trunk_transform = glm::mat4(1.0);
+	trunk_transform = rotation_matrix * glm::translate(trunk_transform, glm::vec3(x_pos + 2.0f, y_pos + 0.15f, z_pos + 5.5f));
+	trunk_transform = glm::scale(trunk_transform, glm::vec3(2.5f, 1.15f, 2.0f));
+	this->trunk_transform = trunk_transform;
+
+	//***BONNET***
+	glm::mat4 bonnet_transform = glm::mat4(1.0);
+	bonnet_transform = rotation_matrix * glm::translate(bonnet_transform, glm::vec3(x_pos + 2.0f, y_pos + 0.15f, z_pos + -1.5f));
+	bonnet_transform = glm::scale(bonnet_transform, glm::vec3(2.5f, 1.15f, 2.0f));
+	this->bonnet_transform = bonnet_transform;
+
+	//***ROOF***
+	glm::mat4 roof_transform = glm::mat4(1.0);
+	roof_transform = rotation_matrix * glm::translate(roof_transform, glm::vec3(x_pos + 2.0f, y_pos + 2.375f, z_pos + 2.0f));
+	roof_transform = glm::scale(roof_transform, glm::vec3(3.0f, 0.75f, 3.0f));
+
+}
+
+void CarModel::UpdateCollisionBoxes()
+{
+	collision_boxes[0].Update(wheel1_transform);
+	collision_boxes[1].Update(wheel2_transform);
+	collision_boxes[2].Update(wheel3_transform);
+	collision_boxes[3].Update(wheel4_transform);
+	collision_boxes[4].Update(body_transform);
+	collision_boxes[5].Update(trunk_transform);
+	collision_boxes[6].Update(bonnet_transform);
+}
+
+std::vector<ColliderBox> CarModel::getCollisionBoxes()
+{
+	return collision_boxes;
+}
+
+void CarModel::Translate(glm::vec3 trans, float dt)
+{
+	x_pos += trans.x * 10* dt;
+	y_pos += trans.y * 10* dt;
+	z_pos += trans.z * 10*dt;
+}
+
+void CarModel::GetsHit(glm::vec3 vel)
+{
+	collision_timer = 1.0f;
+	movement = hit;
+	collision_velocity = vel;
+	translation_timer = (static_cast<float> (rand()) / static_cast<float>(RAND_MAX)) *2.0f + 1; //Reset timer
+	rotation_timer = (static_cast<float> (rand()) / static_cast<float>(RAND_MAX)) *2.0f + 1; //Reset timer
+}
+
+void CarModel::setRandomMovement(bool x)
+{
+	move_random = x;
 }

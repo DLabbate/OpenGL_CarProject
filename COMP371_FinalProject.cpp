@@ -26,6 +26,8 @@
 #include "Light.h"
 #include "Quad.h"
 #include "Spawner.h"
+#include "ColliderBox.h"
+#include "Collider.h"
 
 //Framebuffer callback not needed for this assignment
 void framebuffer_size_callback(GLFWwindow* w, int width, int height);
@@ -42,7 +44,9 @@ car_shader_mode car_shader = lighting;
 GLint polygonmode; // Global Variable
 int keystate_N = GLFW_RELEASE;
 int keystate_PgUp = GLFW_RELEASE;
+int keystate_Enter = GLFW_RELEASE;
 bool displayHeadlights = 0;
+bool move_random = false;
 
 float WINDOW_WIDTH = 1024;
 float WINDOW_HEIGHT = 768;
@@ -737,6 +741,21 @@ int main()
 
 	Spawner spawner;
 
+	ColliderBox coll;
+	Collider collider;
+	CarModel car2(-20.0f, 0.5f, -20.0f);
+
+	/*std::vector<CarModel> cars = 
+	{ CarModel(-20.0f,0.5f,-20.0f),CarModel(-30.0f, 0.5f, -30.0f),CarModel(20.0f, 0.5f, 30.0f), CarModel(5.0f,0.5f,15.0f),
+		CarModel(30.0f,0.5f,3.0f), CarModel(-4.0f, 0.5f, -7.0f), CarModel(-21.0f, 0.5f, -14.0f), CarModel(-30.0f, 0.5f, 20.0f)
+	};*/
+
+	std::vector<CarModel> cars =
+	{ CarModel(-20.0f,0.5f,-20.0f),CarModel(-30.0f, 0.5f, -30.0f),CarModel(20.0f, 0.5f, 30.0f), CarModel(5.0f,0.5f,15.0f),
+		CarModel(30.0f,0.5f,3.0f), CarModel(-4.0f, 0.5f, -7.0f)
+	};
+	
+
 	while (!glfwWindowShouldClose(window))
 	{
 		//glm::mat4 lightProjection = glm::perspective(glm::radians(45.0f), (float)(SHADOW_WIDTH / SHADOW_HEIGHT), 70.0f, 140.0f);
@@ -777,6 +796,10 @@ int main()
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		car.DrawCar(shaderprogram_simpledepth, shaderprogram_simpledepth, deltatime, rubber_texure);
+		for (int i = 0; i < cars.size(); i++)
+		{
+			cars[i].DrawCar(shaderprogram_simpledepth, shaderprogram_simpledepth, deltatime, rubber_texure);
+		}
 		g.drawGround(shaderprogram_simpledepth);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glCullFace(GL_BACK);
@@ -926,7 +949,55 @@ int main()
 		//glUseProgram(shaderprogram_textured);
 		//g.drawGround();
 
+
 		//car.TranslateRandom(deltatime);
+		//car2.DrawCar(shaderprogram_car, shaderprogram_textured, deltatime, rubber_texure);
+		//car.UpdateTransformations();
+		//car2.UpdateTransformations();
+		//car.UpdateCollisionBoxes();
+		//car2.UpdateCollisionBoxes();
+		//car2.TranslateRandom(deltatime);
+
+
+		//if (glm::length(car.getPosition() - car2.getPosition()) < 15.0f)
+		//{
+		//	collider.checkCollisionCar(car, car2, deltatime);
+		//}
+
+		//collider.checkCollisionCar(car, cars[2], deltatime);
+		car.TranslateRandom(deltatime);
+		car.UpdateTransformations();
+		car.UpdateCollisionBoxes();
+		car.setRandomMovement(move_random);
+		
+		for (int i = 0; i< cars.size(); i++)
+		{
+			cars[i].UpdateTransformations();
+			cars[i].UpdateCollisionBoxes();
+			if (glm::length(car.getPosition() - cars[i].getPosition()) < 10.0f)
+			{
+				collider.checkCollisionCar(car, cars[i], deltatime);
+			}
+			
+			cars[i].DrawCar(shaderprogram_car, shaderprogram_textured, deltatime, rubber_texure);
+			cars[i].TranslateRandom(deltatime);
+		}
+
+		for (int i = 0; i < cars.size(); i++)
+		{
+			for (int j = i; j < cars.size(); j++)
+			{
+				if (i != j)
+				{
+					if (glm::length(cars[i].getPosition() - cars[j].getPosition()) < 10.0f)
+					{
+						collider.checkCollisionCar(cars[i], cars[j], deltatime);
+					}
+				}
+			}	
+		}
+
+		
 		
 		//QUAD TEST***********************************************
 		//glUseProgram(shaderprogram_textured);
@@ -947,6 +1018,12 @@ int main()
 		glEnable(GL_DEPTH_TEST);
 		//*********************************************************
 
+		
+		if ((glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) && (keystate_Enter == GLFW_RELEASE))
+		{
+			move_random = !move_random;
+		}
+		keystate_Enter = glfwGetKey(window, GLFW_KEY_ENTER);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

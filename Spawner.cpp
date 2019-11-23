@@ -59,13 +59,14 @@ void Spawner::updateSmoke(float dt)
 void Spawner::updateRotation(Camera camera)
 {
 	glm::vec3 cameraLookAt = camera.getTarget();
-	glm::vec3 originalAxis(0, 0, -1);
+	glm::vec3 originalAxis(0, 0, 1);
 
 	cameraLookAt.y = 0; //project onto xz plane
-	cameraLookAt.x *= -1;
+	//cameraLookAt.x *= -1;
 	cameraLookAt = normalize(cameraLookAt);
 
-	float billboardRotation = glm::acos(-1 * dot(originalAxis, cameraLookAt)) * 360 / (2 * glm::pi<float>());
+	float billboardRotation = glm::acos(-dot(originalAxis, cameraLookAt)) * 360 / (2 * glm::pi<float>());
+	billboardRotation += 180;
 
 	if (cameraLookAt.x > 0) 
 	{
