@@ -28,6 +28,7 @@
 #include "Spawner.h"
 #include "ColliderBox.h"
 #include "Collider.h"
+#include "Border.h"
 
 //Framebuffer callback not needed for this assignment
 void framebuffer_size_callback(GLFWwindow* w, int width, int height);
@@ -45,8 +46,11 @@ GLint polygonmode; // Global Variable
 int keystate_N = GLFW_RELEASE;
 int keystate_PgUp = GLFW_RELEASE;
 int keystate_Enter = GLFW_RELEASE;
+int keystate_Backspace = GLFW_RELEASE;
 bool displayHeadlights = 0;
 bool move_random = false;
+int border_texture;
+int border_texture_ID;
 
 float WINDOW_WIDTH = 1024;
 float WINDOW_HEIGHT = 768;
@@ -627,8 +631,9 @@ int main()
 	}
 
 	//glViewport(0, 0, 1024, 768);
-	glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
-	//glClearColor(160.0f/255, 216.0f/255, 243.0f/255, 0.0f);
+	//glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
+	glClearColor(160.0f/255, 216.0f/255, 243.0f/255, 0.0f);
+	//glClearColor(112.0f / 255, 217.0f / 255, 249.0f / 255, 0.0f);
 
 	//Enable Depth Test
 	glEnable(GL_DEPTH_TEST);
@@ -665,6 +670,8 @@ int main()
 	unsigned int grass_texure = loadTexture("Textures/Grass.jpg");
 	unsigned int rubber_texure = loadTexture("Textures/Rubber3.jpg");
 	unsigned int smoke_texure = loadTexture("Textures/Smoke.png");
+	unsigned int wood_texture = loadTexture("Textures/Wood3.jpg");
+	unsigned int wood_texture2 = loadTexture("Textures/Wood2.jpg");
 
 
 	GLuint gridVAO = getSquareGrid();	//Grid VAO
@@ -755,6 +762,9 @@ int main()
 		CarModel(30.0f,0.5f,3.0f), CarModel(-4.0f, 0.5f, -7.0f)
 	};
 	
+	Border border;
+
+	int border_texture = wood_texture;
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -801,6 +811,7 @@ int main()
 			cars[i].DrawCar(shaderprogram_simpledepth, shaderprogram_simpledepth, deltatime, rubber_texure);
 		}
 		g.drawGround(shaderprogram_simpledepth);
+		border.DrawBorder(shaderprogram_simpledepth, wood_texture);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glCullFace(GL_BACK);
 		//***********************************************************************************
@@ -968,8 +979,16 @@ int main()
 		car.TranslateRandom(deltatime);
 		car.UpdateTransformations();
 		car.UpdateCollisionBoxes();
-		car.setRandomMovement(move_random);
 		
+		
+		//for (int i = 0; i < 20; i++)
+		//{
+		//	car.DrawCar(shaderprogram_car, shaderprogram_textured, deltatime, rubber_texure);
+		//}
+
+
+	
+
 		for (int i = 0; i< cars.size(); i++)
 		{
 			cars[i].UpdateTransformations();
@@ -1017,11 +1036,42 @@ int main()
 		spawner.drawSmoke(shaderprogram_particle,deltatime);
 		glEnable(GL_DEPTH_TEST);
 		//*********************************************************
-
 		
+		//MOTION BLUR TEST*********************************************************
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		spawner.spawnCars(deltatime, car);
+		spawner.updateCars(deltatime, shaderprogram_particle);
+		spawner.drawCars(shaderprogram_particle, shaderprogram_particle, deltatime, rubber_texure);
+		glEnable(GL_DEPTH_TEST);
+		//**************************************************************************
+
+
+		//BORDER TEST********************************************************************************************
+		if (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS && (keystate_Backspace == GLFW_RELEASE))
+		{
+			border_texture_ID++;
+			border_texture_ID = border_texture_ID % 2;
+		}
+		keystate_Backspace = glfwGetKey(window, GLFW_KEY_BACKSPACE);
+		if (border_texture_ID == 0)
+		{
+			border_texture = wood_texture;
+		}
+		else if (border_texture_ID == 1)
+		{
+			border_texture = wood_texture2;
+		}
+		
+		border.DrawBorder(shaderprogram_textured, border_texture);
+		//********************************************************************************************************
+
+
 		if ((glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) && (keystate_Enter == GLFW_RELEASE))
 		{
 			move_random = !move_random;
+			car.setRandomMovement(move_random);
 		}
 		keystate_Enter = glfwGetKey(window, GLFW_KEY_ENTER);
 

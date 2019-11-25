@@ -31,6 +31,15 @@ CarModel::CarModel(float x, float y, float z)
 	}
 }
 
+CarModel::CarModel(glm::vec3 pos)
+{
+	this->x_pos = pos.x;
+	this->y_pos = pos.y;
+	this->z_pos = pos.z;
+	generateBodyVAO();
+	generateWheelVAO();
+}
+
 void CarModel::generateBodyVAO()
 {
 	float vertices[] = {
@@ -314,6 +323,20 @@ void CarModel::DrawCar(int shaderprogram, int shaderprogram_wheels,float deltati
 	glUniformMatrix4fv(model_matrix_location_body, 1, GL_FALSE, &spotlight2_transform[0][0]);
 	//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	glm::mat4 tailLight1_transform = glm::mat4(1.0);
+	tailLight1_transform = rotation_matrix * glm::translate(tailLight1_transform, glm::vec3(x_pos + 3.0f, y_pos + 0.5, z_pos + 6.5f));
+	tailLight1_transform = glm::scale(tailLight1_transform, glm::vec3(0.25f, 0.25f, 0.25f));
+	glUniformMatrix4fv(model_matrix_location_body, 1, GL_FALSE, &tailLight1_transform[0][0]);
+	//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	glm::mat4 tailLight2_transform = glm::mat4(1.0);
+	tailLight2_transform = rotation_matrix * glm::translate(tailLight2_transform, glm::vec3(x_pos + 1.0f, y_pos + 0.5, z_pos + 6.5f));
+	tailLight2_transform = glm::scale(tailLight2_transform, glm::vec3(0.25f, 0.25f, 0.25f));
+	glUniformMatrix4fv(model_matrix_location_body, 1, GL_FALSE, &tailLight2_transform[0][0]);
+	//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
 void CarModel::updateVectors()
@@ -332,35 +355,82 @@ void CarModel::ProcessInputs(GLFWwindow* w, float deltatime)
 		if (glfwGetKey(w, GLFW_KEY_W) == GLFW_PRESS)
 		{
 			//z_pos -= movementspeed * deltatime;
-			x_pos += front.x * movementspeed * deltatime;
-			y_pos += front.y * movementspeed * deltatime;
-			z_pos += front.z * movementspeed * deltatime;
+			
+			//x_pos += front.x * movementspeed * deltatime;
+			//y_pos += front.y * movementspeed * deltatime;
+			//z_pos += front.z * movementspeed * deltatime;
 			car_angle += wheel_angle_lateral * 5.0f* deltatime;
+
+			float translation_x = front.x * movementspeed * deltatime;
+			float translation_y = front.y * movementspeed * deltatime;
+			float translation_z = front.z * movementspeed * deltatime;
+
+			x_pos = (((x_pos + translation_x+2) < 40.0f) && ((x_pos + translation_x+2) > -40.0f)) ? x_pos + translation_x : x_pos;
+			y_pos = (((y_pos + translation_y+0.75) < 40.0f) && ((y_pos + translation_y+0.75) > -40.0f)) ? y_pos + translation_y : y_pos;
+			z_pos = (((z_pos + translation_z+2) < 40.0f) && ((z_pos + translation_z+2) > -40.0f)) ? z_pos + translation_z : z_pos;
+			//std::cout << x_pos << " " << y_pos << " " << z_pos<<std::endl;
+			
 		}
 
 		if (glfwGetKey(w, GLFW_KEY_S) == GLFW_PRESS)
 		{
 			//z_pos += movementspeed * deltatime;
-			x_pos -= front.x * movementspeed * deltatime;
+			
+			/*x_pos -= front.x * movementspeed * deltatime;
 			y_pos -= front.y * movementspeed * deltatime;
 			z_pos -= front.z * movementspeed * deltatime;
-			car_angle -= wheel_angle_lateral * 5.0f* deltatime;
+			car_angle -= wheel_angle_lateral * 5.0f* deltatime;*/
+
+			float translation_x = -front.x * movementspeed * deltatime;
+			float translation_y = -front.y * movementspeed * deltatime;
+			float translation_z = -front.z * movementspeed * deltatime;
+
+			/*x_pos = ((x_pos + translation_x) < 40.0f && (x_pos + translation_x) > -40.0f) ? x_pos + translation_x : x_pos;
+			y_pos = ((y_pos + translation_y) < 40.0f && (y_pos + translation_y) > -40.0f) ? y_pos + translation_y : y_pos;
+			z_pos = ((z_pos + translation_z) < 40.0f && (z_pos + translation_z) > -40.0f) ? z_pos + translation_z : z_pos;*/
+			x_pos = (((x_pos + translation_x + 2) < 40.0f) && ((x_pos + translation_x + 2) > -40.0f)) ? x_pos + translation_x : x_pos;
+			y_pos = (((y_pos + translation_y + 0.75) < 40.0f) && ((y_pos + translation_y + 0.75) > -40.0f)) ? y_pos + translation_y : y_pos;
+			z_pos = (((z_pos + translation_z + 2) < 40.0f) && ((z_pos + translation_z + 2) > -40.0f)) ? z_pos + translation_z : z_pos;
 		}
 
 		if (glfwGetKey(w, GLFW_KEY_A) == GLFW_PRESS)
 		{
 			//x_pos -= movementspeed * deltatime;
-			x_pos -= right.x * movementspeed * deltatime;
+			
+			/*x_pos -= right.x * movementspeed * deltatime;
 			y_pos -= right.y * movementspeed * deltatime;
-			z_pos -= right.z * movementspeed * deltatime;
+			z_pos -= right.z * movementspeed * deltatime;*/
+
+			float translation_x = -right.x * movementspeed * deltatime;
+			float translation_y = -right.y * movementspeed * deltatime;
+			float translation_z = -right.z * movementspeed * deltatime;
+
+		/*	x_pos = ((x_pos + translation_x) < 40.0f && (x_pos + translation_x) > -40.0f) ? x_pos + translation_x : x_pos;
+			y_pos = ((y_pos + translation_y) < 40.0f && (y_pos + translation_y) > -40.0f) ? y_pos + translation_y : y_pos;
+			z_pos = ((z_pos + translation_z) < 40.0f && (z_pos + translation_z) > -40.0f) ? z_pos + translation_z : z_pos;*/
+			x_pos = (((x_pos + translation_x + 2) < 40.0f) && ((x_pos + translation_x + 2) > -40.0f)) ? x_pos + translation_x : x_pos;
+			y_pos = (((y_pos + translation_y + 0.75) < 40.0f) && ((y_pos + translation_y + 0.75) > -40.0f)) ? y_pos + translation_y : y_pos;
+			z_pos = (((z_pos + translation_z + 2) < 40.0f) && ((z_pos + translation_z + 2) > -40.0f)) ? z_pos + translation_z : z_pos;
 		}
 
 		if (glfwGetKey(w, GLFW_KEY_D) == GLFW_PRESS)
 		{
 			//x_pos += movementspeed * deltatime;
-			x_pos += right.x * movementspeed * deltatime;
+			
+			/*x_pos += right.x * movementspeed * deltatime;
 			y_pos += right.y * movementspeed * deltatime;
-			z_pos += right.z * movementspeed * deltatime;
+			z_pos += right.z * movementspeed * deltatime;*/
+
+			float translation_x = right.x * movementspeed * deltatime;
+			float translation_y = right.y * movementspeed * deltatime;
+			float translation_z = right.z * movementspeed * deltatime;
+
+			/*x_pos = ((x_pos + translation_x) < 40.0f && (x_pos + translation_x) > -40.0f) ? x_pos + translation_x : x_pos;
+			y_pos = ((y_pos + translation_y) < 40.0f && (y_pos + translation_y) > -40.0f) ? y_pos + translation_y : y_pos;
+			z_pos = ((z_pos + translation_z) < 40.0f && (z_pos + translation_z) > -40.0f) ? z_pos + translation_z : z_pos;*/
+			x_pos = (((x_pos + translation_x + 2) < 40.0f) && ((x_pos + translation_x + 2) > -40.0f)) ? x_pos + translation_x : x_pos;
+			y_pos = (((y_pos + translation_y + 0.75) < 40.0f) && ((y_pos + translation_y + 0.75) > -40.0f)) ? y_pos + translation_y : y_pos;
+			z_pos = (((z_pos + translation_z + 2) < 40.0f) && ((z_pos + translation_z + 2) > -40.0f)) ? z_pos + translation_z : z_pos;
 		}
 
 		if (glfwGetKey(w, GLFW_KEY_Q) == GLFW_PRESS)
@@ -438,6 +508,7 @@ void CarModel::Reset()
 glm::vec3 CarModel::getPosition() const
 {
 	return glm::vec3(x_pos + 2.0f, y_pos + 0.75f, z_pos + 2.0f);
+	//return glm::vec3(x_pos, y_pos, z_pos);
 }
 
 glm::vec3 CarModel::getFront() const
@@ -554,10 +625,13 @@ void CarModel::TranslateRandom(float dt)
 		{
 			float translation_x = front.x * movementspeed * dt;
 			float translation_z = front.z * movementspeed * dt;
-			x_pos = ((x_pos + translation_x) < 40.0f && (x_pos + translation_x) > -40.0f) ? x_pos + translation_x : x_pos;
-			z_pos = ((z_pos + translation_z) < 40.0f && (z_pos + translation_z) > -40.0f) ? z_pos + translation_z : z_pos;
+			/*x_pos = ((x_pos + translation_x) < 40.0f && (x_pos + translation_x) > -40.0f) ? x_pos + translation_x : x_pos;
+			z_pos = ((z_pos + translation_z) < 40.0f && (z_pos + translation_z) > -40.0f) ? z_pos + translation_z : z_pos;*/
 			/*x_pos = (-40.0f < x_pos < 40.0f) ? x_pos + front.x * translation_random * dt : x_pos;
 			z_pos = (-40.0f < z_pos < 40.0f) ? z_pos + front.z * translation_random * dt : z_pos;*/
+
+			x_pos = (((x_pos + translation_x + 2) < 40.0f) && ((x_pos + translation_x + 2) > -40.0f)) ? x_pos + translation_x : x_pos;
+			z_pos = (((z_pos + translation_z + 2) < 40.0f) && ((z_pos + translation_z + 2) > -40.0f)) ? z_pos + translation_z : z_pos;
 		}
 
 		else
@@ -602,9 +676,12 @@ void CarModel::TranslateRandom(float dt)
 			float translation_y = collision_velocity.y * 10 * dt;
 			float translation_z = collision_velocity.z * 10 * dt;
 			
-			x_pos = ((x_pos + translation_x) < 40.0f && (x_pos + translation_x) > -40.0f) ? x_pos + translation_x : x_pos;
+			/*x_pos = ((x_pos + translation_x) < 40.0f && (x_pos + translation_x) > -40.0f) ? x_pos + translation_x : x_pos;
 			y_pos = ((y_pos + translation_y) < 40.0f && (y_pos + translation_y) > -40.0f) ? y_pos + translation_y : y_pos;
-			z_pos = ((z_pos + translation_z) < 40.0f && (z_pos + translation_z) > -40.0f) ? z_pos + translation_z : z_pos;
+			z_pos = ((z_pos + translation_z) < 40.0f && (z_pos + translation_z) > -40.0f) ? z_pos + translation_z : z_pos;*/
+			x_pos = (((x_pos + translation_x + 2) < 40.0f) && ((x_pos + translation_x + 2) > -40.0f)) ? x_pos + translation_x : x_pos;
+			y_pos = (((y_pos + translation_y + 0.75) < 40.0f) && ((y_pos + translation_y + 0.75) > -40.0f)) ? y_pos + translation_y : y_pos;
+			z_pos = (((z_pos + translation_z + 2) < 40.0f) && ((z_pos + translation_z + 2) > -40.0f)) ? z_pos + translation_z : z_pos;
 		}
 		else
 		{
@@ -723,4 +800,19 @@ void CarModel::GetsHit(glm::vec3 vel)
 void CarModel::setRandomMovement(bool x)
 {
 	move_random = x;
+}
+
+float CarModel::getCarAngle()
+{
+	return car_angle;
+}
+
+glm::vec3 CarModel::getPos() const
+{
+	return glm::vec3(x_pos, y_pos, z_pos);
+}
+
+glm::vec3 CarModel::getCollisionVelocity() const
+{
+	return collision_velocity;
 }

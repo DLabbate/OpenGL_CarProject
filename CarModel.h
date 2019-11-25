@@ -9,11 +9,13 @@ class CarModel
 public:
 	CarModel();
 	CarModel(float, float, float);
+	CarModel(glm::vec3);
 	~CarModel();
 	void DrawCar(int, int,float,unsigned int);
 	void ProcessInputs(GLFWwindow*, float);
 	void Reset();
-	glm::vec3 getPosition() const;
+	glm::vec3 getPosition() const; //Centred of the car
+	glm::vec3 getPos() const; //x,y,z
 	glm::vec3 getFront() const;
 	void generateBodyVAO();
 	void generateWheelVAO();
@@ -25,7 +27,7 @@ public:
 	glm::vec3 getTailLight2();
 	glm::vec3 getExhaust();
 	void updateVectors();
-
+	float getCarAngle();
 	
 	void TranslateRandom(float);
 	
@@ -36,8 +38,9 @@ public:
 	void Translate(glm::vec3,float);
 	void GetsHit(glm::vec3);
 	void setRandomMovement(bool);
+	glm::vec3 getCollisionVelocity() const;
 
-private:
+protected:
 	GLuint vao_body;
 	GLuint vao_wheel;
 	float x_pos;

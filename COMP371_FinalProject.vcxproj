@@ -156,8 +156,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Axes.h" />
+    <ClInclude Include="Border.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CarModel.h" />
+    <ClInclude Include="CarModelTransparent.h" />
     <ClInclude Include="Collider.h" />
     <ClInclude Include="ColliderBox.h" />
     <ClInclude Include="Grid.h" />
@@ -169,8 +171,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Axes.cpp" />
+    <ClCompile Include="Border.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CarModel.cpp" />
+    <ClCompile Include="CarModelTransparent.cpp" />
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="ColliderBox.cpp" />
     <ClCompile Include="COMP371_FinalProject.cpp" />

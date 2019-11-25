@@ -36,7 +36,7 @@ private:
 	float angle_z_random;
 
 	float opacity;
-	float opacity_final = 0.3f;
+	float opacity_final = 0.15f;
 	float opacity_initial = 1.0f;
 };
 

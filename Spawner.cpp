@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "Spawner.h"
+#include "CarModel.h"
+#include "CarModelTransparent.h"
 
 
 Spawner::Spawner()
@@ -45,13 +47,17 @@ void Spawner::drawSmoke(int shaderprogram,float dt)
 
 void Spawner::updateSmoke(float dt)
 {
-	for (std::list<Quad*>::iterator it = smokeparticles.begin(); it != smokeparticles.end(); ++it)
+	for (std::list<Quad*>::iterator it = smokeparticles.begin(); it != smokeparticles.end(); )
 	{
 		(*it)->Update(dt);
 		if ((*it)->checkExpired() == true)
 		{
 			it = smokeparticles.erase(it);
 			//Erase after life duration is reached
+		}
+		else
+		{
+			++it;
 		}
 	}
 }
@@ -78,5 +84,51 @@ void Spawner::updateRotation(Camera camera)
 	{
 		(*it)->updateRotation(billboardRotation);
 	}
+}
+
+
+void Spawner::drawCars(int shaderprogram_car,int shaderprogram_wheels,float deltatime,unsigned int wheel_texture)
+{
+	//if (cars.size() >= 4)
+	{
+		for (std::list<CarModelTransparent*>::iterator it = cars.begin(); it != cars.end(); ++it)
+		{
+			(*it)->DrawCar(shaderprogram_car, shaderprogram_wheels, deltatime, wheel_texture);
+		}
+	}
+}
+
+void Spawner::updateCars(float dt,int shaderprogram)
+{
+	//if (cars.size() >= 4)
+	{
+		for (std::list<CarModelTransparent*>::iterator it = cars.begin(); it != cars.end(); )
+		{
+			(*it)->Update(dt, shaderprogram);
+			if ((*it)->checkExpired() == true)
+			{
+				it = cars.erase(it);
+				//Erase after life duration is reached
+			}
+
+			else
+			{
+				++it; //we don't want to increment when we erase, because it already increments
+			}
+		}
+	}
+}
+
+
+void Spawner::spawnCars(float dt, CarModel& car)
+{
+	//CarModel c(car);
+	spawn_timer_car += dt;
+	if ((spawn_timer_car > spawn_interval_car) && (car.getCollisionVelocity() != glm::vec3(0.0f, 0.0f, 0.0f)))
+	{
+		cars.push_back(new CarModelTransparent(car));
+		spawn_timer_car -= spawn_interval_car; //Reset to 0seconds
+	}
+
 }
 

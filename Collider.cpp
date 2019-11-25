@@ -39,7 +39,7 @@ glm::vec3 Collider::checkCollision(ColliderBox box1, ColliderBox box2)
 			//std::cout << glm::vec3(T1*glm::vec4(point, 1.0f)).x;
 			//glm::vec3 translation = (T1*glm::vec4(point, 1.0f));
 			//return glm::vec3(-translation.x, 0.0f, -translation.z);
-			std::cout << box1.getCentre().x;
+			//std::cout << box1.getCentre().x;
 			return glm::vec3(box1.getCentre().x - box2.getCentre().x,0.0f, box1.getCentre().z - box2.getCentre().z);
 		}
 

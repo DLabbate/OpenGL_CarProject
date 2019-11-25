@@ -9,6 +9,8 @@
 #include "Quad.h"
 #include <list>
 #include "Camera.h"
+#include "CarModel.h"
+#include "CarModelTransparent.h"
 class Spawner
 {
 public:
@@ -19,10 +21,16 @@ public:
 	void drawSmoke(int,float);
 	void updateSmoke(float);
 	void updateRotation(Camera);
+	void updateCars(float,int);
+	void drawCars(int, int, float, unsigned int);
+	void spawnCars(float,CarModel&);
 
 private:
 	float spawn_timer = 0.0f;
 	float spawn_interval = 0.025f/2;
+	float spawn_timer_car = 0.0f;
+	float spawn_interval_car = 0.010f;
 	std::list<Quad*> smokeparticles;
+	std::list<CarModelTransparent*> cars;
 };
 
