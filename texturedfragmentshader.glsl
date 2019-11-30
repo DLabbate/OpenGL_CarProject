@@ -42,11 +42,15 @@
 		uniform Light headlight2;
 		uniform Light taillight1;
 		uniform Light taillight2;
-
+		
+		uniform vec3 headlight_positions[12];
+		uniform vec3 taillight_positions[12];
 
 		uniform float far_plane = 25.0f;
 
 		vec3 CalculatePointLight(Light,vec3,vec3,vec3);
+		vec3 CalculateHeadLight(vec3,vec3,vec3,vec3);
+		vec3 CalculateTailLight(vec3,vec3,vec3,vec3);
 		float ShadowCalculation(vec4);
 
 		void main()
@@ -59,11 +63,23 @@
 		vec3 result3 = CalculatePointLight(headlight2,Normal, FragPos, camera_position);
 		vec3 result4 = CalculatePointLight(taillight1,Normal, FragPos, camera_position);
 		vec3 result5 = CalculatePointLight(taillight2,Normal, FragPos, camera_position);
-		
+
+		vec3 result6 = vec3(0.0);
+		vec3 result7 = vec3(0.0);
+
+		for (int i=0; i < 12; i++)
+		{
+			result6 += CalculateHeadLight(headlight_positions[i],Normal, FragPos, camera_position);
+		}
+
+		for (int i=0; i < 12; i++)
+		{
+			result7 += CalculateTailLight(taillight_positions[i],Normal, FragPos, camera_position);
+		}
 
 		if (displayHeadLights)
 		{
-		FragColor = vec4(result+result2+result3+result4+result5,1.0f);
+		FragColor = vec4(result+result2+result3+result4+result5+result6+result7,1.0f);
 		}
 
 		else
@@ -152,4 +168,62 @@
 
 		}
 
+		}
+
+
+		vec3 CalculateHeadLight(vec3 lightpos,vec3 Normal, vec3 FragPos, vec3 camera_position)
+		{
+		float constant = 1.0f;
+		float linear = 0.14f;
+		float quadratic = 0.07f;
+		float distance = length(lightpos - FragPos);
+		float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));  
+
+		vec3 normal_updated = normalize(Normal);
+		vec3 lightdirection = normalize(lightpos - FragPos);
+		float diffuse_value = max(dot(normal_updated, lightdirection), 0.0);
+
+		vec3 view_direction = normalize(camera_position - FragPos);
+		vec3 reflection_direction = reflect(-lightdirection,normal_updated);
+		float spec = pow(max(dot(view_direction, reflection_direction), 0.0),material.shininess);
+		
+		vec3 ambient = vec3(texture(texturesampler,vertexUV)) * vec3(0.5f,0.5f,0.5f);
+		vec3 diffuse = vec3(texture(texturesampler,vertexUV)) * (diffuse_value) * vec3(1.0f,1.0f,1.0f); 
+		vec3 specular = (material.specular * spec) * vec3(1.0f,1.0f,1.0f);
+
+		ambient  *= attenuation; 
+		diffuse  *= attenuation;
+		specular *= attenuation;   
+
+		vec3 result = (ambient + ( 1.0f - ShadowCalculation(FragPosLightSpace) ) * (diffuse + specular));
+		return result;
+		}
+
+
+		vec3 CalculateTailLight(vec3 lightpos,vec3 Normal, vec3 FragPos, vec3 camera_position)
+		{
+		float constant = 1.0f;
+		float linear = 0.14f;
+		float quadratic = 0.07f;
+		float distance = length(lightpos - FragPos);
+		float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));  
+
+		vec3 normal_updated = normalize(Normal);
+		vec3 lightdirection = normalize(lightpos - FragPos);
+		float diffuse_value = max(dot(normal_updated, lightdirection), 0.0);
+
+		vec3 view_direction = normalize(camera_position - FragPos);
+		vec3 reflection_direction = reflect(-lightdirection,normal_updated);
+		float spec = pow(max(dot(view_direction, reflection_direction), 0.0),material.shininess);
+		
+		vec3 ambient = vec3(texture(texturesampler,vertexUV)) * vec3(0.5f,0.0f,0.0f);
+		vec3 diffuse = vec3(texture(texturesampler,vertexUV)) * (diffuse_value) * vec3(1.0f,0.0f,0.0f); 
+		vec3 specular = (material.specular * spec) * vec3(1.0f,1.0f,1.0f);
+
+		ambient  *= attenuation; 
+		diffuse  *= attenuation;
+		specular *= attenuation;   
+
+		vec3 result = (ambient + ( 1.0f - ShadowCalculation(FragPosLightSpace) ) * (diffuse + specular));
+		return result;
 		}

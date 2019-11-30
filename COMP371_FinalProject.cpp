@@ -42,13 +42,15 @@ ground_texture_mode ground = grid;
 enum car_shader_mode { regular, lighting };
 car_shader_mode car_shader = lighting;
 
-GLint polygonmode; // Global Variable
+GLint polygonmode; // Global Variables
 int keystate_N = GLFW_RELEASE;
 int keystate_PgUp = GLFW_RELEASE;
 int keystate_Enter = GLFW_RELEASE;
 int keystate_Backspace = GLFW_RELEASE;
+int keystate_Del = GLFW_RELEASE;
 bool displayHeadlights = 0;
 bool move_random = false;
+bool bumpercar_animation = true;
 int border_texture;
 int border_texture_ID;
 
@@ -761,6 +763,16 @@ int main()
 	{ CarModel(-20.0f,0.5f,-20.0f),CarModel(-30.0f, 0.5f, -30.0f),CarModel(20.0f, 0.5f, 30.0f), CarModel(5.0f,0.5f,15.0f),
 		CarModel(30.0f,0.5f,3.0f), CarModel(-4.0f, 0.5f, -7.0f)
 	};
+
+	//std::vector<Light> headlights = {};
+	//std::vector<Light> taillights = {};
+	std::vector<glm::vec3> headlight_positions = {};
+	std::vector<glm::vec3> taillight_positions = {};
+	for (int i = 0; i < 12; i++) //Allocate space for headlights and taillights (2 headlights and 2 taillights per car)
+	{
+		headlight_positions.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+		taillight_positions.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+	}
 	
 	Border border;
 
@@ -835,10 +847,7 @@ int main()
 		glUseProgram(shaderprogram_light);
 		light.draw(shaderprogram_light);
 		//light.processInput(window, deltatime);
-		light.updateShader(shaderprogram_car);
-		light.updateShader(shaderprogram_textured);
-		light.updateShader(shaderprogram_simpledepth);
-		light.updateShader(shaderprogram_particle);
+		g.updateGroundMaterial(shaderprogram_textured);
 		headlight1.setPosition(car.getHeadLight1());
 		headlight2.setPosition(car.getHeadLight2());
 		headlight1.updateHeadLight_1(shaderprogram_textured);
@@ -851,6 +860,46 @@ int main()
 		taillight1.updateTailLight_1(shaderprogram_textured);
 		taillight2.updateTailLight_2(shaderprogram_textured);
 
+		light.updateShader(shaderprogram_car);
+		light.updateShader(shaderprogram_textured);
+		light.updateShader(shaderprogram_simpledepth);
+		light.updateShader(shaderprogram_particle);
+		
+		int light_counter = 0;
+			for (int i = 0; i < 6; i++)
+			{
+				headlight_positions[light_counter] = (cars[i].getHeadLight1());
+				taillight_positions[light_counter] = (cars[i].getTailLight1());
+
+				headlight_positions[light_counter + 1] = (cars[i].getHeadLight2());
+				taillight_positions[light_counter + 1] = (cars[i].getTailLight2());
+				light_counter += 2;
+				//std::cout << light_counter << std::endl;
+			}
+		
+		
+
+		glUseProgram(shaderprogram_textured);
+		
+		for (int i = 0; i < 12; i++)
+		{
+			std::string s = std::to_string(i);
+			int headlights_location = glGetUniformLocation(shaderprogram_textured, ("headlight_positions["+s+"]").c_str());
+			glUniform3f(headlights_location, headlight_positions[i].x, headlight_positions[i].y, headlight_positions[i].z);
+		}
+
+		for (int i = 0; i < 12; i++)
+		{
+			std::string s = std::to_string(i);
+			int taillights_location = glGetUniformLocation(shaderprogram_textured, ("taillight_positions["+s+"]").c_str());
+			glUniform3f(taillights_location, taillight_positions[i].x, taillight_positions[i].y, taillight_positions[i].z);
+		}
+
+
+		
+		/*int headlights_location = glGetUniformLocation(shaderprogram_textured, "headlight_positions");
+		glUniform3fv(headlights_location,12,&(headlight_positions.data()[0].x));*/
+		
 
 		glUseProgram(shaderprogram_textured);
 		int displayHeadLights_location = glGetUniformLocation(shaderprogram_textured, "displayHeadLights");
@@ -999,9 +1048,12 @@ int main()
 			}
 			
 			cars[i].DrawCar(shaderprogram_car, shaderprogram_textured, deltatime, rubber_texure);
-			cars[i].TranslateRandom(deltatime);
+			if (bumpercar_animation == true)
+			{
+				cars[i].TranslateRandom(deltatime);
+			}
 		}
-
+	
 		for (int i = 0; i < cars.size(); i++)
 		{
 			for (int j = i; j < cars.size(); j++)
@@ -1016,7 +1068,31 @@ int main()
 			}	
 		}
 
-		
+		if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS && (keystate_Del == GLFW_RELEASE))
+		{
+			bumpercar_animation = !bumpercar_animation;
+		}
+		keystate_Del = glfwGetKey(window, GLFW_KEY_DELETE);
+
+		//BORDER TEST********************************************************************************************
+		if (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS && (keystate_Backspace == GLFW_RELEASE))
+		{
+			border_texture_ID++;
+			border_texture_ID = border_texture_ID % 2;
+		}
+		keystate_Backspace = glfwGetKey(window, GLFW_KEY_BACKSPACE);
+		if (border_texture_ID == 0)
+		{
+			border_texture = wood_texture;
+		}
+		else if (border_texture_ID == 1)
+		{
+			border_texture = wood_texture2;
+		}
+
+		border.DrawBorder(shaderprogram_textured, border_texture);
+		//********************************************************************************************************
+
 		
 		//QUAD TEST***********************************************
 		//glUseProgram(shaderprogram_textured);
@@ -1046,26 +1122,6 @@ int main()
 		spawner.drawCars(shaderprogram_particle, shaderprogram_particle, deltatime, rubber_texure);
 		glEnable(GL_DEPTH_TEST);
 		//**************************************************************************
-
-
-		//BORDER TEST********************************************************************************************
-		if (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS && (keystate_Backspace == GLFW_RELEASE))
-		{
-			border_texture_ID++;
-			border_texture_ID = border_texture_ID % 2;
-		}
-		keystate_Backspace = glfwGetKey(window, GLFW_KEY_BACKSPACE);
-		if (border_texture_ID == 0)
-		{
-			border_texture = wood_texture;
-		}
-		else if (border_texture_ID == 1)
-		{
-			border_texture = wood_texture2;
-		}
-		
-		border.DrawBorder(shaderprogram_textured, border_texture);
-		//********************************************************************************************************
 
 
 		if ((glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) && (keystate_Enter == GLFW_RELEASE))
