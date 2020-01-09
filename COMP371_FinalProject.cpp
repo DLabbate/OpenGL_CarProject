@@ -761,7 +761,7 @@ int main()
 
 	std::vector<CarModel> cars =
 	{ CarModel(-20.0f,0.5f,-20.0f),CarModel(-30.0f, 0.5f, -30.0f),CarModel(20.0f, 0.5f, 30.0f), CarModel(5.0f,0.5f,15.0f),
-		CarModel(30.0f,0.5f,3.0f), CarModel(-4.0f, 0.5f, -7.0f)
+		CarModel(30.0f,0.5f,3.0f), CarModel(-4.0f, 0.5f, -7.0f), CarModel(-20.0f,0.5f,-20.0f)
 	};
 
 	//std::vector<Light> headlights = {};
